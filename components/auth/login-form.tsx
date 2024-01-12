@@ -1,9 +1,10 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import CardWrapper from "./card-wrapper";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { loginSchema, TLoginSchema } from "@/schemas/types";
+import { loginSchema, TLoginSchema } from "@/utils/schemas/types";
+import { login } from "@/actions/login";
 
 const LoginForm = () => {
   const {
@@ -13,8 +14,14 @@ const LoginForm = () => {
     formState: { errors, isSubmitting },
   } = useForm<TLoginSchema>({ resolver: zodResolver(loginSchema) });
 
+  const [serverError, setServerError] = useState<any | null>(null);
+  const [serverSuccess, setServerSuccess] = useState<any | null>(null);
+
   const onSubmit = async (data: TLoginSchema) => {
-    console.log(data);
+    login(data).then((data) => {
+      setServerError(data.error);
+      setServerSuccess(data.success);
+    });
     reset();
   };
   return (
@@ -29,13 +36,13 @@ const LoginForm = () => {
         className="flex flex-col gap-y-6 "
       >
         <input
-          {...register("username")}
+          {...register("email")}
           type="text"
-          placeholder="Username"
+          placeholder="Email"
           className="rounded p-2"
         />
-        {errors.username && (
-          <p className="text-red-500 ">{`${errors.username.message}`}</p>
+        {errors.email && (
+          <p className="text-red-500 ">{`${errors.email.message}`}</p>
         )}
         <input
           {...register("password")}
@@ -46,7 +53,10 @@ const LoginForm = () => {
         {errors.password && (
           <p className="text-red-500 ">{`${errors.password.message}`}</p>
         )}
-
+        {serverError && <p className="text-red-500"> {serverError}</p>}
+        {serverSuccess && (
+          <p className="text-green-500 ">{`${serverSuccess}`}</p>
+        )}
         <button
           disabled={isSubmitting}
           type="submit"

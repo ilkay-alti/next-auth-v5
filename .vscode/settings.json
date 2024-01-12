@@ -1,0 +1,16 @@
+{
+  "editor.renderWhitespace": "selection",
+  "editor.cursorStyle": "line",
+  "editor.multiCursorModifier": "alt",
+  "editor.wordWrap": "off",
+  "files.autoGuessEncoding": false,
+  "files.insertFinalNewline": false,
+  "breadcrumbs.showVariables": true,
+  "breadcrumbs.showTypeParameters": true,
+  "breadcrumbs.showStructs": true,
+  "breadcrumbs.showStrings": true,
+  "breadcrumbs.showProperties": true,
+  "breadcrumbs.showPackages": true,
+  "breadcrumbs.showOperators": true,
+  "breadcrumbs.symbolSortOrder": "position"
+}

@@ -1,9 +1,12 @@
 "use client";
-import React from "react";
-import CardWrapper from "./card-wrapper";
-import { zodResolver } from "@hookform/resolvers/zod";
+
+import React, { startTransition, useState } from "react";
 import { useForm } from "react-hook-form";
-import { registerSchema, TRegisterSchema } from "@/schemas/types";
+import { zodResolver } from "@hookform/resolvers/zod";
+import CardWrapper from "./card-wrapper";
+import { registerSchema, TRegisterSchema } from "@/utils/schemas/types";
+import { registerServer } from "@/actions/register";
+
 const RegisterForm = () => {
   const {
     register,
@@ -12,8 +15,15 @@ const RegisterForm = () => {
     formState: { errors, isSubmitting },
   } = useForm<TRegisterSchema>({ resolver: zodResolver(registerSchema) });
 
+  const [serverError, setServerError] = useState<any | null>(null);
+  const [serverSuccess, setServerSuccess] = useState<any | null>(null);
+
   const onSubmit = async (data: TRegisterSchema) => {
-    console.log(data);
+    registerServer(data).then((data) => {
+      setServerError(data.error);
+      setServerSuccess(data.success);
+    });
+
     reset();
   };
   return (
@@ -33,14 +43,28 @@ const RegisterForm = () => {
           type="text"
           placeholder="Username"
           className="rounded p-2"
+          disabled={isSubmitting}
         />
         {errors.username && (
           <p className="text-red-500 ">{`${errors.username.message}`}</p>
+        )}
+
+        <input
+          {...register("email")}
+          type="email"
+          placeholder="
+          Email"
+          disabled={isSubmitting}
+          className="rounded p-2"
+        />
+        {errors.email && (
+          <p className="text-red-500 ">{`${errors.email.message}`}</p>
         )}
         <input
           {...register("password")}
           type="password"
           placeholder="Password"
+          disabled={isSubmitting}
           className="rounded p-2"
         />
         {errors.password && (
@@ -50,11 +74,17 @@ const RegisterForm = () => {
           {...register("confirmPassword")}
           type="password"
           placeholder="Confirm Password"
+          disabled={isSubmitting}
           className="rounded p-2"
         />
         {errors.confirmPassword && (
           <p className="text-red-500 ">{`${errors.confirmPassword.message}`}</p>
         )}
+        {serverError && <p className="text-red-500"> {serverError}</p>}
+        {serverSuccess && (
+          <p className="text-green-500 ">{`${serverSuccess}`}</p>
+        )}
+
         <button
           disabled={isSubmitting}
           type="submit"
