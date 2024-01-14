@@ -11,7 +11,7 @@ export const login = async (values: TLoginSchema) => {
     return { error: "Invalid login credentials" };
   }
 
-  const { email, password } = validatedFields.data;
+  const { email, password } = validatedFields.data as any;
 
   try {
     await signIn("credentials", {

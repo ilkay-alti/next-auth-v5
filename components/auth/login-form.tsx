@@ -30,6 +30,7 @@ const LoginForm = () => {
       backButtonLabel="Create an account"
       page="Login"
       backButtonHref="/auth/register"
+      showSocial
     >
       <form
         onSubmit={handleSubmit(onSubmit)}

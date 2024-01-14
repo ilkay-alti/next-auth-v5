@@ -32,7 +32,6 @@ const RegisterForm = () => {
       backButtonLabel="Login to your account"
       page="Register"
       backButtonHref="/auth/login"
-      showSocial
     >
       <form
         onSubmit={handleSubmit(onSubmit)}
