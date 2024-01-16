@@ -5,8 +5,16 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { loginSchema, TLoginSchema } from "@/utils/schemas/types";
 import { login } from "@/actions/login";
+import { useSearchParams } from "next/navigation";
 
 const LoginForm = () => {
+  const serchParams = useSearchParams();
+
+  const urlError =
+    serchParams.get("error") === "OAuthAccountNotLinked"
+      ? "You have not linked your account yet"
+      : null;
+
   const {
     register,
     handleSubmit,
@@ -58,6 +66,7 @@ const LoginForm = () => {
         {serverSuccess && (
           <p className="text-green-500 ">{`${serverSuccess}`}</p>
         )}
+        {urlError && <p className="text-green-500 ">{`${urlError}`}</p>}
         <button
           disabled={isSubmitting}
           type="submit"
