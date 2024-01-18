@@ -3,44 +3,42 @@ import React, { useState } from "react";
 import CardWrapper from "./card-wrapper";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { loginSchema, TLoginSchema } from "@/utils/schemas/types";
+import {
+  ResetPasswordSchema,
+  TResetPasswordSchema,
+} from "@/utils/schemas/types";
 import { login } from "@/actions/login";
-import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { resetPassword } from "@/actions/reset-password";
 
-const LoginForm = () => {
-  const serchParams = useSearchParams();
-
-  const urlError =
-    serchParams.get("error") === "OAuthAccountNotLinked"
-      ? "You have not linked your account yet"
-      : null;
-
+const ResetForm = () => {
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<TLoginSchema>({ resolver: zodResolver(loginSchema) });
+  } = useForm<TResetPasswordSchema>({
+    resolver: zodResolver(ResetPasswordSchema),
+  });
 
   const [serverError, setServerError] = useState<any | null>(null);
   const [serverSuccess, setServerSuccess] = useState<any | null>(null);
 
-  const onSubmit = async (data: TLoginSchema) => {
-    login(data).then((data) => {
+  const onSubmit = async (email: TResetPasswordSchema) => {
+    resetPassword(email).then((data) => {
       setServerError(data.error);
       setServerSuccess(data.success);
     });
+
     reset();
   };
   return (
     <>
       <CardWrapper
-        headerLabel="🎄 Welcome back"
-        backButtonLabel="Create an account"
-        page="Login"
-        backButtonHref="/auth/register"
-        showSocial
+        headerLabel="🎄 Forgot your password?"
+        backButtonLabel="Back to login"
+        page="Forgot Password"
+        backButtonHref="/auth/login"
       >
         <form
           onSubmit={handleSubmit(onSubmit)}
@@ -55,34 +53,18 @@ const LoginForm = () => {
           {errors.email && (
             <p className="text-red-500 ">{`${errors.email.message}`}</p>
           )}
-          <input
-            {...register("password")}
-            type="password"
-            placeholder="Password"
-            className="rounded p-2"
-          />
-          {errors.password && (
-            <p className="text-red-500 ">{`${errors.password.message}`}</p>
-          )}
+
           {serverError && <p className="text-red-500"> {serverError}</p>}
           {serverSuccess && (
             <p className="text-green-500 ">{`${serverSuccess}`}</p>
           )}
-          {urlError && <p className="text-green-500 ">{`${urlError}`}</p>}
-
-          <Link
-            href="/auth/reset-password "
-            className="hover:underline hover:text-red-500 underline-offset-2 text-sm text-gray-800"
-          >
-            Forgot password ?
-          </Link>
 
           <button
             disabled={isSubmitting}
             type="submit"
             className=" bg-red-400 disabled:bg-gray-500 px-4 py-2 rounded-lg text-white"
           >
-            Login
+            Send Reset Email
           </button>
         </form>
       </CardWrapper>
@@ -90,4 +72,4 @@ const LoginForm = () => {
   );
 };
 
-export default LoginForm;
+export default ResetForm;
