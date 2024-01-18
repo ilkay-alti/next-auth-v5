@@ -2,7 +2,9 @@
 
 import { getUserByEmail } from "@/data/user";
 import { db } from "@/utils/db";
+import { sendVerificitaionEmail } from "@/utils/mail";
 import { TRegisterSchema } from "@/utils/schemas/types";
+import { genereateVerificationToken } from "@/utils/tokens";
 import bcrypt from "bcryptjs";
 
 export const registerServer = async (data: TRegisterSchema) => {
@@ -25,5 +27,12 @@ export const registerServer = async (data: TRegisterSchema) => {
     },
   });
 
-  return { success: "User created successfully" };
+  const verificationToken = await genereateVerificationToken(email);
+
+  await sendVerificitaionEmail(
+    verificationToken.email,
+    verificationToken.token
+  );
+
+  return { success: "Comfirmation email sent!" };
 };
