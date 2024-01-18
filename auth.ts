@@ -55,7 +55,6 @@ export const {
 
       if (!existingUser) return token;
 
-      console.log("token", existingUser);
       token.role = existingUser.role;
 
       return token;

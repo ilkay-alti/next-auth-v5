@@ -3,7 +3,6 @@ import { auth, signOut } from "@/auth";
 
 const SettingPage = async () => {
   const session = await auth();
-  console.log(session);
 
   return (
     <div>
