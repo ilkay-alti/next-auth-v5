@@ -6,7 +6,7 @@ const SettingPage = () => {
   const user = useCurrentUser();
 
   const onClick = () => {
-    logout();
+    console.log(user);
   };
 
   return (
