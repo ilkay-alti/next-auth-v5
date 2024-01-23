@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { startTransition, useState } from "react";
 import CardWrapper from "./card-wrapper";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -7,6 +7,7 @@ import { loginSchema, TLoginSchema } from "@/utils/schemas/types";
 import { login } from "@/actions/login";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { set } from "zod";
 
 const LoginForm = () => {
   const serchParams = useSearchParams();
@@ -23,15 +24,28 @@ const LoginForm = () => {
     formState: { errors, isSubmitting },
   } = useForm<TLoginSchema>({ resolver: zodResolver(loginSchema) });
 
+  const [showTwoFactor, setShowTwoFactor] = useState<boolean>(false);
   const [serverError, setServerError] = useState<any | null>(null);
   const [serverSuccess, setServerSuccess] = useState<any | null>(null);
 
-  const onSubmit = async (data: TLoginSchema) => {
-    login(data).then((data) => {
-      setServerError(data.error);
-      setServerSuccess(data.success);
+  const onSubmit = async (values: TLoginSchema) => {
+    setServerError(null);
+    setServerSuccess(null);
+    startTransition(() => {
+      login(values)
+        .then((data) => {
+          if (data?.error) {
+            setServerError(data.error);
+          }
+          if (data?.success) {
+            setServerSuccess(data.success);
+          }
+          if (data?.twoFactor) {
+            setShowTwoFactor(true);
+          }
+        })
+        .catch(() => setServerError("Something went wrong loginform.tsx"));
     });
-    reset();
   };
   return (
     <>
@@ -46,37 +60,50 @@ const LoginForm = () => {
           onSubmit={handleSubmit(onSubmit)}
           className="flex flex-col gap-y-6 "
         >
-          <input
-            {...register("email")}
-            type="text"
-            placeholder="Email"
-            className="rounded p-2"
-          />
-          {errors.email && (
-            <p className="text-red-500 ">{`${errors.email.message}`}</p>
+          {showTwoFactor && (
+            <input
+              {...register("code")}
+              type="text"
+              placeholder=" 2FA Code"
+              className="rounded p-2"
+            />
           )}
-          <input
-            {...register("password")}
-            type="password"
-            placeholder="Password"
-            className="rounded p-2"
-          />
-          {errors.password && (
-            <p className="text-red-500 ">{`${errors.password.message}`}</p>
-          )}
-          {serverError && <p className="text-red-500"> {serverError}</p>}
-          {serverSuccess && (
-            <p className="text-green-500 ">{`${serverSuccess}`}</p>
-          )}
-          {urlError && <p className="text-green-500 ">{`${urlError}`}</p>}
 
-          <Link
-            href="/auth/reset-password "
-            className="hover:underline hover:text-red-500 underline-offset-2 text-sm text-gray-800"
-          >
-            Forgot password ?
-          </Link>
+          {!showTwoFactor && (
+            <>
+              <input
+                {...register("email")}
+                type="text"
+                placeholder="Email"
+                className="rounded p-2"
+              />
+              {errors.email && (
+                <p className="text-red-500 ">{`${errors.email.message}`}</p>
+              )}
 
+              <input
+                {...register("password")}
+                type="password"
+                placeholder="Password"
+                className="rounded p-2"
+              />
+              {errors.password && (
+                <p className="text-red-500 ">{`${errors.password.message}`}</p>
+              )}
+              {serverError && <p className="text-red-500"> {serverError}</p>}
+              {serverSuccess && (
+                <p className="text-green-500 ">{`${serverSuccess}`}</p>
+              )}
+              {urlError && <p className="text-green-500 ">{`${urlError}`}</p>}
+
+              <Link
+                href="/auth/reset-password "
+                className="hover:underline hover:text-red-500 underline-offset-2 text-sm text-gray-800"
+              >
+                Forgot password ?
+              </Link>
+            </>
+          )}
           <button
             disabled={isSubmitting}
             type="submit"

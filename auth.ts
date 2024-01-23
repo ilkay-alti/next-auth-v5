@@ -3,6 +3,9 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import { db } from "./utils/db";
 import authConfig from "@/auth.config";
 import { getUserById } from "./data/user";
+import { Economica } from "next/font/google";
+import { getTwoFactorTokenByEmail } from "./data/two-factor-token";
+import { getTwoFactorConfirmationByUserId } from "./data/two-factor-confirmaiton";
 export const {
   handlers: { GET, POST },
   auth,
@@ -35,6 +38,19 @@ export const {
       if (!existingUser?.emailVerified) return false;
 
       //! TODO: Add 2FA check here
+      if (existingUser.isTwoFactorEnabed) {
+        const twoFactorConfirmation = await getTwoFactorConfirmationByUserId(
+          existingUser.id
+        );
+        if (!twoFactorConfirmation) return false;
+
+        // Delete two factor confirmation
+        await db.twoFactorConfirmation.delete({
+          where: {
+            id: twoFactorConfirmation.id,
+          },
+        });
+      }
 
       return true;
     },
